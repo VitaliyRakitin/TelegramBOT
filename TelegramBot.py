@@ -6,6 +6,7 @@
 
 from Keyboards import *
 from constants import *
+from session import kill_session
 
 from config import BOT_TOKEN
 
