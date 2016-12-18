@@ -2,36 +2,25 @@
 
 Для работы бота необходимо наличие MySQL сервера и 4 таблиц:
 
-1. База данных пользователей Users:
-+--------------+-----------+------+-----+---------+-------+
-| Field        | Type      | Null | Key | Default | Extra |
-+--------------+-----------+------+-----+---------+-------+
-| user_id      | char(32)  | YES  |     | NULL    |       |
-| first_name   | char(255) | YES  |     | NULL    |       |
-| last_name    | char(255) | YES  |     | NULL    |       |
-| phone_number | char(32)  | YES  |     | NULL    |       |
-+--------------+-----------+------+-----+---------+-------+
+1. База данных пользователей Users:  <br/>
+ Field     --- Type:  <br/>
+ user_id     ---  char(32);   <br/>
+first_name --- char(255); <br/>
+last_name --- char(255); <br/>
+phone_number --- char(32). <br/>
 
-2. База данных запросов пользователей Notifications:
-+--------------+----------+------+-----+---------+-------+
-| Field        | Type     | Null | Key | Default | Extra |
-+--------------+----------+------+-----+---------+-------+
-| user_id      | char(32) | YES  |     | NULL    |       |
-| notification | text     | YES  |     | NULL    |       |
-| date         | datetime | YES  |     | NULL    |       |
-+--------------+----------+------+-----+---------+-------+
+2. База данных запросов пользователей Notifications:  <br/>
+ Field     --- Type:  <br/>
+ user_id     ---  char(32);   <br/>
+ notification  --- text; <br/>
+date --- datetime.  <br/>
 
 3. База данны для хранения всех слов (для проверки корректности). AllWords: <br/>
-+-----------+-----------+------+-----+---------+-------+ <br/>
-| Field     | Type      | Null | Key | Default | Extra | <br/>
-+-----------+-----------+------+-----+---------+-------+ <br/>
-| words     | char(255) | YES  |     | NULL    |       | <br/>
-| frequency | char(20)  | YES  |     | NULL    |       | <br/>
-+-----------+-----------+------+-----+---------+-------+ <br/>
+ Field     --- Type:  <br/>
+ words     ---  char(255)  <br/>
+ frequency  --- char(20)  <br/>
 
-4. База данных для хранения стоп-слов. StopWords:
-+-----------+-----------+------+-----+---------+-------+
-| Field     | Type      | Null | Key | Default | Extra |
-+-----------+-----------+------+-----+---------+-------+
-| stopwords | char(255) | YES  |     | NULL    |       |
-+-----------+-----------+------+-----+---------+-------+
+
+4. База данных для хранения стоп-слов. StopWords: <br/>
+ Field     --- Type:  <br/>
+ stopwords     ---  char(255)  <br/>
