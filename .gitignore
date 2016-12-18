@@ -1,0 +1,11 @@
+*config.py
+*.DS_Store
+*.swp
+*~
+*.ipynb_checkpoints
+*.aux
+*.out
+*.log
+*.toc
+*.o
+*.pyc
