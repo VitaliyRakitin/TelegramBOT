@@ -5,15 +5,15 @@
 # Автор: Ракитин Виталий
 #
 
-from MySQL import *
+from MySQL import MySQL
 
 def create_session(uid,datetime):
     '''Создать сессию'''
     tablename = "session{0}".format(uid)
-    create_table(tablename,["datetime","message","answer"],["datetime","text","text"])
+    MySQL().create_table(tablename,["datetime","message","answer"],["datetime","text","text"])
     args = (datetime, "start",None)  
     form = "%s,%s,%s"
-    insert_into(tablename, form, args)
+    MySQL().insert_into(tablename, form, args)
 
 
 def add_message_in_session(uid,message):
@@ -21,13 +21,13 @@ def add_message_in_session(uid,message):
     tablename = "session{0}".format(uid)
     args = (message["datetime"],message["message"],message["answer"])  
     form = "%s,%s,%s"
-    insert_into(tablename, form, args)
+    MySQL().insert_into(tablename, form, args)
 
 
 def kill_session(uid):
     '''Закрыть сессию'''
     tablename = "session{0}".format(uid)
-    drop_table(tablename)
+    MySQL().drop_table(tablename)
 
 
 
@@ -45,5 +45,5 @@ def save_device_in_session(message,number):
 def get_number_from_session(uid):    
     '''достаём номер изображения из сессии'''
     tablename = "session{0}".format(uid)
-    number = select_from_where("answer",tablename, "message","YESNO")[0]
+    number = MySQL().select_from_where(["answer"],tablename, "message","YESNO")[0]
     return int(number[0])

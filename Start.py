@@ -5,60 +5,84 @@
 # Автор: Ракитин Виталий
 #
 
-from DBProcessing import create_new_user, create_user_dict_from_db_answer, check_user_in_users_db
+from DB import UsersDB
+
 from session import create_session
-from constants import *
-from Keyboards import send_contact_keyboard,RT_SERVICES_keyboard
-from CleverHouse import clever_house_callback
 
-def start(bot, update):
-
-    checkUserID, contact = check_user_in_users_db(update.message.from_user.id)
-
-    if (checkUserID): 
-        contact = create_user_dict_from_db_answer(contact)
-        #create_session(update.message.from_user.id,update.message.date)
-        update.message.reply_text(HELLO_KNOWN.format(contact["first_name"])+"!:)")
-        update.message.reply_text(RT_SERVICES,reply_markup = RT_SERVICES_keyboard)
-        return START_CONVERSATION
-    else:
-        update.message.reply_text(HELLO_NEW,reply_markup=send_contact_keyboard)
-    return GET_CONTACT
+from constants import Replies as rp 
+from constants import States as st
+from Keyboards import Keyboards as kb
 
 
-def create_message_contact_dict(contact):
-    print contact
-    res = {}
-    res["user_id"] = contact.user_id
-    res["phone_number"] = contact.phone_number
-    res["first_name"] = contact.first_name
-    res["last_name"] = contact.last_name
-    return res
+class Start(object):
 
 
-def get_contact(bot, update):
-    update.message.reply_text("Приятно познакомиться!\n")
-    new_contact = create_message_contact_dict(update.message.contact)
-    create_new_user(new_contact)
-    #create_session(update.message.from_user.id,update.message.date)
-    update.message.reply_text(RT_SERVICES,reply_markup = RT_SERVICES_keyboard)
-    return START_CONVERSATION
+    def __init__(self, CleverHouse):
+        self.ch = CleverHouse
+        self.db = UsersDB()
+        self.HELP = "help"
+        self.INTERNET = "internet"
+        self.HOUSE = "home"
+
+        self.HELP_RU = "Техподдержка"
+        self.INTERNET_RU = "Интернет"
+        self.HOUSE_RU = "Умный дом"
+
+        self.UID = "user_id"
+        self.PHONE = "phone_number"
+        self.FIRST_NAME = "first_name"
+        self.LAST_NAME = "last_name"
 
 
+    def start(self, bot, update):
 
-def call_back(bot, update):
-    '''
-    Считываем информацию из главного меню
-    '''
-    if update.callback_query.data == "help":
-        bot.send_message(update.callback_query.from_user.id,"Введите текст Вашего обращения:")
-        update.callback_query.answer("Техподдержка")
-        return NEED_HELP
-    elif  update.callback_query.data == "internet":
-        update.callback_query.answer("Интернет")
-        return START_CONVERSATION #INTERNET_INFO
-    elif  update.callback_query.data == "home":
-        update.callback_query.answer("Умный дом")
-        return clever_house_callback(bot, update)
+        checkUserID, contact = self.db.check_user_in_db(update.message.from_user.id)
 
-    return START_CONVERSATION
+        if (checkUserID): 
+            contact = self.db.create_user_dict_from_db_answer(contact)
+            #create_session(update.message.from_user.id,update.message.date)
+            update.message.reply_text(rp.HELLO_KNOWN_USER.format(contact[self.FIRST_NAME]) + "!:)")
+            update.message.reply_text(rp.RT_SERVICES_LIST, reply_markup = kb.RT_SERVICES_KEYBOARD)
+            return st.START_CONVERSATION
+        else:
+            update.message.reply_text(rp.HELLO_NEW_USER, reply_markup = kb.SEND_CONTACT_KEYBOARD)
+        return st.GET_CONTACT
+
+    
+    def create_contact_dict_from_message(self, contact):
+        contact_dict = {}
+        contact_dict[self.UID] = contact.user_id
+        contact_dict[self.PHONE] = contact.phone_number
+        contact_dict[self.FIRST_NAME] = contact.first_name
+        contact_dict[self.LAST_NAME] = contact.last_name
+        return contact_dict
+
+
+    def get_contact(self, bot, update):
+        update.message.reply_text(rp.NICE_TO_MEET_YOU)
+        new_contact = self.db.create_contact_dict_from_message(update.message.contact)
+        self.db.create_new_user(new_contact)
+        update.message.reply_text(rp.RT_SERVICES_LIST,reply_markup = kb.RT_SERVICES_KEYBOARD)
+        return st.START_CONVERSATION
+
+
+    def call_back(self, bot, update):
+        '''
+        Считываем информацию из главного меню
+        '''
+        if update.callback_query.data == self.HELP:
+            bot.send_message(update.callback_query.from_user.id,rp.PRINT_YOUR_REQUESR)
+            update.callback_query.answer(self.HELP_RU)
+            return st.NEED_HELP
+
+        elif update.callback_query.data == self.INTERNET:
+            update.callback_query.answer(self.INTERNET_RU)
+            return st.START_CONVERSATION #INTERNET_INFO
+
+        elif  update.callback_query.data == self.HOUSE:
+            update.callback_query.answer(self.HOUSE_RU)
+            return self.ch.clever_house_callback(bot, update)
+
+        return st.START_CONVERSATION
+if __name__ == "__main__":
+    print Start().HELP
