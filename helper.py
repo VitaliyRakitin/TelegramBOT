@@ -1,3 +1,4 @@
+#!/usr/bin/python 
 # -*- coding: utf-8 -*-
 #
 # Телеграм Бот компании Ростелеком
@@ -15,7 +16,8 @@ from constants import States as st
 from Keyboards import Keyboards as kb
 
 class Helper(object):
-    def __init__(self):
+    def __init__(self, session):
+        self.session = session
         self.NO_SUCH_ANSWER = -1
         self.learn = Learning()
         self.learn.fit()
@@ -51,7 +53,7 @@ class Helper(object):
         чтобы внести запрос в базу
         '''
         notification = {}
-        notification["user_id"] = message.from_user.id
+        notification["user_id"] = message.chat.id
         notification["notification"] = message.text
         notification["date"] = message.date
         return notification

@@ -1,9 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python 
 # -*- coding: utf-8 -*-
 #
 # Телеграм Бот компании Ростелеком
 # Приведение слова к правильному виду
 # Автор: Ракитин Виталий
+#
+# http://polyglot.readthedocs.io/en/latest/Installation.html !!!
 #
 
 import Stemmer
@@ -18,9 +20,14 @@ class WordCorrection(object):
 
     def edits(self, word):
         '''
-        Перебор всех соседей слов
+        Перебор всех соседей слов.
+        deletion --- remove one letter 
+        transposition --- swap two adjacent letters,
+        replacement --- change one letter to another 
+        insertion --- add a letter
+        returns a set of all the edited strings (whether words or not) that can be made with one simple edit
         '''
-        splits     = [(word[:i], word[i:]) for i in range(len(word) + 1)]
+        splits     = [(word[:i], word[i:]) for i in range(len(word) + 1)] # куски
         deletes    = [a + b[1:] for a, b in splits if b]
         transposes = [a + b[1] + b[0] + b[2:] for a, b in splits if len(b)>1]
         replaces   = [a + c + b[1:] for a, b in splits for c in self.alphabet if b]
@@ -36,13 +43,15 @@ class WordCorrection(object):
 
         word = word.lower()
 
-        if self.allwords.check_word(word.encode("utf-8")):
-            return word
+        check = self.allwords.check_word(word.encode("utf-8"))
+        if check:
+            return check
 
         edits_words = self.edits(word)
         for w in edits_words:
-            if self.allwords.check_word(w.encode("utf-8")):
-                return w
+            check = self.allwords.check_word(w.encode("utf-8"))
+            if check:
+                return check
         return word
 
     def stemming(self, word):

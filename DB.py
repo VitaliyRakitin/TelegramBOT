@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python 
 # -*- coding: utf-8 -*-
 #
 # Телеграм Бот компании Ростелеком
@@ -26,6 +26,7 @@ class UsersDB(object):
         self.LAST_NAME = "last_name"
         self.NUMBER = "phone_number"
         self.ALL = "*"
+        self.COUNT = "COUNT(*)"
         
         self.sql = MySQL()
 
@@ -112,6 +113,7 @@ class StopWordsDB(object):
     def __init__(self):
         self.TABLE = "stopwords"
         self.ALL = "*"
+        self.COUNT = "COUNT(*)"
         self.sql = MySQL()
 
     def get_stops(self):
@@ -123,22 +125,25 @@ class StopWordsDB(object):
 class AllWordsDB(object):
     '''
     Обработка базы данных хранения всех слов (для проверки корректности)
-    +-------------+-----------+
-    | words       | frequency |
-    +-------------+-----------+
+    +----------+-----------+-----------+
+    | words    | synonym   | frequency |
+    +----------+-----------+-----------+
     '''
     def __init__(self):
         self.TABLE = "allwords"
         self.COLUMN = "words"
+        self.SYNONYM = "synonym"
+        self.COUNT = "COUNT(*)"
         self.sql = MySQL()
 
     def check_word(self,word):
-        res_list = self.sql.select_from_where([self.COLUMN],
+        '''Returns the best synonym of the word'''
+        res_list = self.sql.select_from_where([self.SYNONYM],
                                               self.TABLE,
                                               self.COLUMN,
                                               word)
         if len(res_list) > 0:
-            return True
+            return res_list[0][0]
         else:
             return False
 
@@ -156,6 +161,7 @@ class QuestionsDB(object):
         self.ANSWER = "answer"
         self.NUMBER = "number"
         self.ALL = "*"
+        self.COUNT = "COUNT(*)"
         self.sql = MySQL()
 
     def get_questions(self):
@@ -168,8 +174,8 @@ class QuestionsDB(object):
 
     def add_question(self, question, answer, number = None):
         if number == None:
-            questions = self.sql.select_from([self.ALL],self.TABLE)
-            number = len(questions)
+            questions = self.sql.select_from([self.COUNT],self.TABLE)
+            number = questions[0][0]
 
         args = (number, question, answer)
         
@@ -196,13 +202,14 @@ class DevicesDB(object):
         #self.EM = "emoji"
         self.PATH = "path"
         self.NUMBER = "number"
-        self.ALL = "*"
+        self.ALL = "*"        
+        self.COUNT = "COUNT(*)"
         self.sql = MySQL()
 
     def add_device(self, name, description, path,number = None):
         if number == None:
-            questions = self.sql.select_from([self.ALL],self.TABLE)
-            number = len(questions)
+            questions = self.sql.select_from([self.COUNTALL],self.TABLE)
+            number = questions[0][0]
 
         args = (number, name, description, path)
         
@@ -308,7 +315,7 @@ if __name__ == "__main__":
  #   "house/7.jpg",
  #   ]   
 
-    db = DevicesDB()
+ #   db = DevicesDB()
  #   for i,dev in enumerate(RT_CLEVER_HOUSE_DEVICES):
  #       db.add_device(dev,RT_CLEVER_HOUSE_DEVICES_TEXT[i],RT_CLEVER_HOUSE_DEVICES_PATH[i])
-    print db.get_devices()    
+ #   print db.get_devices()    

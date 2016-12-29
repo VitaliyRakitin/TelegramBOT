@@ -1,3 +1,4 @@
+#!/usr/bin/python 
 # -*- coding: utf-8 -*-
 #
 # Телеграм Бот компании Ростелеком
@@ -7,8 +8,6 @@
 
 from DB import UsersDB
 
-from session import create_session
-
 from constants import Replies as rp 
 from constants import States as st
 from Keyboards import Keyboards as kb
@@ -17,8 +16,9 @@ from Keyboards import Keyboards as kb
 class Start(object):
 
 
-    def __init__(self, CleverHouse):
+    def __init__(self, CleverHouse, sessions):
         self.ch = CleverHouse
+        self.sessions = sessions
         self.db = UsersDB()
         self.HELP = "help"
         self.INTERNET = "internet"
@@ -36,11 +36,11 @@ class Start(object):
 
     def start(self, bot, update):
 
-        checkUserID, contact = self.db.check_user_in_db(update.message.from_user.id)
+        checkUserID, contact = self.db.check_user_in_db(update.message.chat.id)
+        self.sessions.create(update.message.chat.id)
 
         if (checkUserID): 
             contact = self.db.create_user_dict_from_db_answer(contact)
-            #create_session(update.message.from_user.id,update.message.date)
             update.message.reply_text(rp.HELLO_KNOWN_USER.format(contact[self.FIRST_NAME]) + "!:)")
             update.message.reply_text(rp.RT_SERVICES_LIST, reply_markup = kb.RT_SERVICES_KEYBOARD)
             return st.START_CONVERSATION
@@ -60,7 +60,7 @@ class Start(object):
 
     def get_contact(self, bot, update):
         update.message.reply_text(rp.NICE_TO_MEET_YOU)
-        new_contact = self.db.create_contact_dict_from_message(update.message.contact)
+        new_contact = self.create_contact_dict_from_message(update.message.contact)
         self.db.create_new_user(new_contact)
         update.message.reply_text(rp.RT_SERVICES_LIST,reply_markup = kb.RT_SERVICES_KEYBOARD)
         return st.START_CONVERSATION
@@ -71,7 +71,7 @@ class Start(object):
         Считываем информацию из главного меню
         '''
         if update.callback_query.data == self.HELP:
-            bot.send_message(update.callback_query.from_user.id,rp.PRINT_YOUR_REQUESR)
+            bot.send_message(update.callback_query.message.chat.id,rp.PRINT_YOUR_REQUESR)
             update.callback_query.answer(self.HELP_RU)
             return st.NEED_HELP
 

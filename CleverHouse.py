@@ -1,3 +1,4 @@
+#!/usr/bin/python 
 # -*- coding: utf-8 -*-
 #
 # Телеграм Бот компании Ростелеком
@@ -11,11 +12,11 @@ from constants import DEVICES_EMOJI as em
 from constants import WHITE_HEAVY_CHECK_MARK
 from Keyboards import Keyboards as kb
 from DB import DevicesDB
-from session import *
 
 class CleverHouse(object):
     
-    def __init__(self):
+    def __init__(self, sessions):
+        self.sessions = sessions
         self.db = DevicesDB()
 
 
@@ -32,13 +33,14 @@ class CleverHouse(object):
         update.message.reply_text(em[number] + device + em[number])
         update.message.reply_text(description)
         update.message.reply_text(rp.WOULD_YOU_LIKE_TO_SEE_IT,reply_markup = kb.YES_NO_KEYBOARD)
-        save_device_in_session(update.message,number)
+        print number
+        self.sessions.add_device(update.message.from_user.id, number)
         return st.YES_NO_CHOICE
 
 
     def send_photo_of_clever_house_devices(self, bot, message):
         '''Отправим фотографию девайся, номер хранится в сессии'''
-        number = get_number_from_session(message.from_user.id)
+        number = self.sessions.get_device(message.from_user.id)
         photo_path = self.db.get_img_path(number).encode("utf-8")
         bot.send_photo( photo=open(photo_path, 'rb'),
                         chat_id=message.from_user.id)
@@ -53,14 +55,12 @@ class CleverHouse(object):
         text = unicode(text.encode("utf-8"),"utf-8").encode("utf-8").lower() 
 
         if text == "да" or "да" in text:
-            self.send_photo_of_clever_house_devices(bot,update.message)
+            self.send_photo_of_clever_house_devices(bot, update.message)
             update.message.reply_text(rp.ANY_MORE_DEVICES, reply_markup = kb.YES_NO_KEYBOARD)
-            kill_session(update.message.from_user.id)
             return st.YES_NO_CHOICE_TO_DEVICES
 
         elif text == "нет" or "нет" in text:
             update.message.reply_text(rp.OK + rp.ANY_MORE_DEVICES,reply_markup = kb.YES_NO_KEYBOARD)
-            kill_session(update.message.from_user.id)
             return st.YES_NO_CHOICE_TO_DEVICES
         else: 
             update.message.reply_text(rp.DONT_UNDERSTAND,reply_markup = kb.YES_NO_KEYBOARD)
@@ -128,4 +128,5 @@ class CleverHouse(object):
            return self.clever_house(bot,update.message)
 
         update.message.reply_text(rp.RT_SERVICES_LIST,reply_markup = kb.RT_SERVICES_KEYBOARD)
+        print self.sessions.info(update.message.from_user.id)
         return st.START_CONVERSATION

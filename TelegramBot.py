@@ -1,3 +1,4 @@
+#!/usr/bin/python 
 # -*- coding: utf-8 -*-
 #
 # Телеграм Бот компании Ростелеком
@@ -6,7 +7,7 @@
 
 from Keyboards import Keyboards
 from constants import States as st
-from session import kill_session
+from session import Sessions
 
 from config import BOT_TOKEN
 
@@ -32,26 +33,28 @@ class TelegramBot:
     '''
 
     def __init__(self, token):
-        self.House = CleverHouse()
+        self.sessions = Sessions()
+
+        self.House = CleverHouse(self.sessions)
         self.house_information = self.House.house_information
         self.get_photo_or_not = self.House.get_photo_or_not
         self.resend_devices = self.House.resend_devices
 
-        self.Start = Start(self.House)
+        self.Start = Start(self.House, self.sessions)
         self.start = self.Start.start
         self.get_contact = self.Start.get_contact
         self.call_back = self.Start.call_back
 
-        self.helper = Helper().helper
+        self.helper = Helper(self.sessions).helper
 
         self.updater = Updater(token) #BOT_TOKEN
         self.dispatcher = self.updater.dispatcher
         self.create_handlers()
         self.add_handlers()
-        self.fit()
+    #   self.fit()
 
-    def fit(self):
-        self.helper = Helper().helper
+    #def fit(self):
+    #    self.helper = Helper().helper
 
     def create_handlers(self):
         self.main_handler = ConversationHandler(
@@ -116,9 +119,8 @@ class TelegramBot:
     def error(bot, update, error):
         logger.warn('Update "%s" caused error "%s"' % (update, error))
 
-    @staticmethod
-    def done(bot, update):
-        kill_session(update.message.from_user.id)
+    def done(self, bot, update):
+        self.sessions.drop(update.message.chat.id)
         update.message.reply_text("До свидания, был рад Вас видеть!")
         return ConversationHandler.END
 
